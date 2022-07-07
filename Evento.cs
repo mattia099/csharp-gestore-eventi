@@ -8,37 +8,53 @@ namespace csharp_gestore_eventi
 {
     internal class Evento
     {
+        private string titolo;
+        private DateTime data;
         public string Titolo { 
             get
             {
-                return Titolo;
+                return this.titolo;
             }
-            set 
-            { 
-                if(value == null)
+            set
+            {
+                try
                 {
-                    throw new ArgumentNullException("value");
+                    if (value == " ")
+                    {
+                        throw new ArgumentNullException("value");
+                    }
+                    else
+                    {
+                        this.titolo = value;
+                    }
                 }
-                else
+                catch (ArgumentNullException)
                 {
-                    Titolo = value;
+                    Console.WriteLine("Non puoi lasciare il campo vuoto");
                 }
             } 
         }
         public DateTime Data {
             get 
             {
-                return Data;
+                return this.data;
             }
             set 
             {
-                if (value < DateTime.Now)
+                try
                 {
-                    throw new ArgumentOutOfRangeException("value");
+                    if (value < DateTime.Now)
+                    {
+                        throw new ArgumentOutOfRangeException("value");
+                    }
+                    else
+                    {
+                        this.data = value;
+                    }
                 }
-                else
+                catch (ArgumentOutOfRangeException)
                 {
-                    Data = value;
+                    Console.WriteLine("Errore: hai inserito una data passata");
                 }
             } 
         }
@@ -66,23 +82,55 @@ namespace csharp_gestore_eventi
         }
         public void DisdiciPosti(int posti)
         {
-            if (posti<NumeroPostiPrenotati && this.Data > DateTime.Now)
+            if (posti < NumeroPostiPrenotati && this.Data > DateTime.Now)
             {
                 this.NumeroPostiPrenotati -= (uint)posti;
             }
-            else if(posti > NumeroPostiPrenotati)
+            else if (posti > NumeroPostiPrenotati)
             {
                 Console.WriteLine("Errore posti non disponibili");
             }
-            else if(this.Data < DateTime.Now)
+            else if (this.Data < DateTime.Now)
             {
                 Console.WriteLine("Errore evento passato");
             }
+            
         }
         public override string ToString()
         {
-            return this.Data.ToString("dd/MM/yyyy") + "-" + Titolo;
+            return this.Data.ToString("dd/MM/yyyy") + "-" + this.Titolo;
         }
 
+        public static void NuovoEvento()
+        {
+            Console.WriteLine("Inserisci il nome dell'evento");
+            string titolo = Console.ReadLine();
+            Console.WriteLine("Inserisci la data dell'evento");
+            string data = Console.ReadLine();
+            Console.WriteLine("Inserisci il numero dei posti totali");
+            uint postiTotali = uint.Parse(Console.ReadLine());
+            Evento evento = new Evento(titolo, DateTime.Parse(data), postiTotali);
+            Console.WriteLine("Quanti posti vuoi prenotare?");
+            int posti= int.Parse(Console.ReadLine());
+            evento.PrenotaPosti(posti);
+            int postiDisponibli = (int)(evento.CapienzaMassima - evento.NumeroPostiPrenotati);
+            Console.WriteLine($"Numero di posti prenotati: {evento.NumeroPostiPrenotati}");
+            Console.WriteLine($"Numero di posti disponibili: {postiDisponibli}");
+            string risposta;
+            do
+            {
+                Console.WriteLine("Vuoi disdire posti (si/no)?");
+                risposta = Console.ReadLine();
+            } while (!(risposta == "si" || risposta == "no"));
+            if (risposta == "si")
+            {
+                Console.WriteLine("Quanti posti vuoi disdire?");
+                posti = int.Parse(Console.ReadLine());
+                evento.DisdiciPosti(posti);
+                postiDisponibli = (int)(evento.CapienzaMassima - evento.NumeroPostiPrenotati);
+                Console.WriteLine($"Numero di posti disponibili: {postiDisponibli}");
+            }
+        }
+        
     }
 }
